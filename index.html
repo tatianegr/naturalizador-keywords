@@ -396,7 +396,11 @@ function naturalizar(kw) {
 
   // procura uma palavra que pede complemento ligado por "de" em qualquer posição
   // (ex: "cabo elétrico preço" -> "preço de cabo elétrico")
-  const headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
+  // palavras de preço/orçamento têm prioridade: governam a frase mesmo se vierem no fim
+  // (ex: "reparo de eixo cardan industrial preço" -> "preço de reparo de eixo cardan industrial")
+  const precoWords = new Set(['preco','precos','valor','valores','orcamento','cotacao','tabela']);
+  let headIdx = nucleoTokens.findIndex(t => precoWords.has(normalizar(t)));
+  if (headIdx === -1) headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
   let frase;
   if (headIdx !== -1) {
