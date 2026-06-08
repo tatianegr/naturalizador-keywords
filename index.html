@@ -198,12 +198,30 @@
     }
 
     .result-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
       background: var(--surface);
       border: 0.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
+      padding: 1.1rem 1.4rem;
       opacity: 0;
       animation: fadeUp 0.4s ease forwards;
+      transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    }
+
+    .result-card:hover {
+      border-color: var(--border-hover);
+      background: var(--surface2);
+      transform: translateY(-1px);
+    }
+
+    .result-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
     }
 
     .result-origin {
@@ -211,43 +229,33 @@
       font-size: 11px;
       color: var(--text-dim);
       letter-spacing: 0.05em;
-      margin-bottom: 10px;
     }
 
-    .suggestion {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 0.5px solid var(--border);
-      gap: 12px;
-    }
-
-    .suggestion:last-child { border-bottom: none; }
-
-    .suggestion span {
-      font-size: 14px;
+    .result-text {
+      font-size: 15px;
       color: var(--text);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.4;
+      letter-spacing: -0.01em;
+      overflow-wrap: break-word;
     }
 
     .btn-copy {
       background: none;
-      border: 0.5px solid transparent;
+      border: 0.5px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 3px 10px;
+      padding: 6px 14px;
       font-family: 'DM Mono', monospace;
       font-size: 11px;
       color: var(--text-dim);
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: border-color 0.2s, color 0.2s;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
 
-    .btn-copy:hover { border-color: var(--border-hover); color: var(--text-muted); }
-    .btn-copy.copied { color: var(--accent); border-color: rgba(201,185,122,0.3); }
+    .btn-copy:hover { border-color: var(--border-hover); color: var(--text); background: var(--accent-dim); }
+    .btn-copy.copied { color: var(--accent); border-color: rgba(201,185,122,0.35); background: var(--accent-dim); }
 
     footer {
       margin-top: 4rem;
@@ -419,15 +427,18 @@ function run() {
     const card=document.createElement('div');
     card.className='result-card';
     card.style.animationDelay=`${idx*0.08}s`;
+    const body=document.createElement('div');
+    body.className='result-body';
     const origin=document.createElement('div');
     origin.className='result-origin';
     origin.textContent=`"${kw}"`;
-    card.appendChild(origin);
+    const text=document.createElement('div');
+    text.className='result-text';
+    text.textContent=naturalizada;
+    body.appendChild(origin);
+    body.appendChild(text);
+    card.appendChild(body);
 
-    const row=document.createElement('div');
-    row.className='suggestion';
-    const span=document.createElement('span');
-    span.textContent=naturalizada;
     const btn=document.createElement('button');
     btn.className='btn-copy';
     btn.textContent='copiar';
@@ -438,9 +449,7 @@ function run() {
         setTimeout(()=>{ btn.textContent='copiar'; btn.classList.remove('copied'); },1800);
       });
     };
-    row.appendChild(span);
-    row.appendChild(btn);
-    card.appendChild(row);
+    card.appendChild(btn);
 
     resultsEl.appendChild(card);
   });
