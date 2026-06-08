@@ -4,38 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Naturalizador de Keywords SEO</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f0f0f;
-      --surface: #181818;
-      --surface2: #222222;
-      --border: rgba(255,255,255,0.08);
-      --border-hover: rgba(255,255,255,0.18);
-      --text: #f0ede8;
-      --text-muted: #888480;
-      --text-dim: #555250;
-      --accent: #c9b97a;
-      --accent-dim: rgba(201,185,122,0.12);
-      --radius: 10px;
-      --radius-sm: 6px;
+      --bg: #05070d;
+      --panel: #0a0d14;
+      --panel-2: #0f1420;
+      --border: #1e2840;
+      --text: #f3f6ff;
+      --muted: #a7b1c7;
+      --accent: #4f8cff;
+      --accent-hover: #3b74dd;
+      --accent-dim: rgba(79,140,255,0.12);
+      --output-bg: #06080f;
+      --footer: #8f9ab3;
+      --radius: 14px;
+      --radius-sm: 10px;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
+      font-family: Arial, sans-serif;
+      font-weight: 400;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 3rem 1.25rem 5rem;
     }
+
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+    * { scrollbar-color: var(--panel-2) var(--bg); scrollbar-width: thin; }
 
     header {
       text-align: center;
@@ -45,8 +49,7 @@
     }
 
     header .eyebrow {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
+      font-size: 13px;
       letter-spacing: 0.15em;
       color: var(--accent);
       text-transform: uppercase;
@@ -54,25 +57,26 @@
     }
 
     header h1 {
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 300;
-      letter-spacing: -0.02em;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       line-height: 1.2;
       color: var(--text);
     }
 
     header p {
       margin-top: 0.75rem;
-      font-size: 14px;
-      color: var(--text-muted);
+      font-size: 15px;
+      color: var(--muted);
       max-width: 420px;
       line-height: 1.6;
     }
 
     .card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
+      background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
       padding: 1.75rem;
       width: 100%;
       max-width: 560px;
@@ -81,11 +85,9 @@
     }
 
     .field-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      text-transform: uppercase;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      color: var(--muted);
       margin-bottom: 8px;
     }
 
@@ -97,35 +99,35 @@
 
     input[type="text"] {
       flex: 1;
-      background: var(--bg);
-      border: 0.5px solid var(--border);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 10px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 300;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
       color: var(--text);
       outline: none;
       transition: border-color 0.2s;
     }
 
-    input[type="text"]::placeholder { color: var(--text-dim); }
-    input[type="text"]:focus { border-color: var(--border-hover); }
+    input[type="text"]::placeholder { color: var(--muted); }
+    input[type="text"]:focus { border-color: var(--accent); }
 
     .btn-add {
-      background: var(--surface2);
-      border: 0.5px solid var(--border);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0 16px;
-      color: var(--text-muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: 15px;
       cursor: pointer;
       white-space: nowrap;
-      transition: border-color 0.2s, color 0.2s;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
 
-    .btn-add:hover { border-color: var(--border-hover); color: var(--text); }
+    .btn-add:hover { border-color: var(--accent); color: var(--text); background: var(--accent-dim); }
 
     .tags {
       display: flex;
@@ -139,20 +141,20 @@
       align-items: center;
       gap: 7px;
       background: var(--accent-dim);
-      border: 0.5px solid rgba(201,185,122,0.25);
+      border: 1px solid rgba(79,140,255,0.3);
       border-radius: 20px;
       padding: 4px 12px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--accent);
-      font-family: 'DM Mono', monospace;
-      font-weight: 300;
+      font-family: Arial, sans-serif;
+      font-weight: 400;
     }
 
     .tag button {
       background: none;
       border: none;
       cursor: pointer;
-      color: rgba(201,185,122,0.5);
+      color: rgba(79,140,255,0.6);
       font-size: 16px;
       line-height: 1;
       padding: 0;
@@ -162,8 +164,8 @@
     .tag button:hover { color: var(--accent); }
 
     .empty-msg {
-      font-size: 12px;
-      color: var(--text-dim);
+      font-size: 14px;
+      color: var(--muted);
       font-style: italic;
       padding: 4px 0;
     }
@@ -182,8 +184,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      background: var(--surface);
-      border: 0.5px solid var(--border);
+      background: var(--output-bg);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.1rem 1.4rem;
       opacity: 0;
@@ -192,8 +194,8 @@
     }
 
     .result-card:hover {
-      border-color: var(--border-hover);
-      background: var(--surface2);
+      border-color: var(--accent-hover);
+      background: var(--panel-2);
       transform: translateY(-1px);
     }
 
@@ -205,49 +207,46 @@
     }
 
     .result-origin {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.05em;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
     }
 
     .result-text {
-      font-size: 15px;
+      font-size: 18px;
       color: var(--text);
       font-weight: 400;
       line-height: 1.4;
-      letter-spacing: -0.01em;
       overflow-wrap: break-word;
     }
 
     .btn-copy {
-      background: none;
-      border: 0.5px solid var(--border);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 6px 14px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-dim);
+      padding: 7px 16px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: var(--muted);
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
       transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
 
-    .btn-copy:hover { border-color: var(--border-hover); color: var(--text); background: var(--accent-dim); }
-    .btn-copy.copied { color: var(--accent); border-color: rgba(201,185,122,0.35); background: var(--accent-dim); }
+    .btn-copy:hover { border-color: var(--accent); color: var(--text); background: var(--accent-dim); }
+    .btn-copy.copied { background: #1a3a1a; color: #6fcf6f; border-color: #3a6a3a; }
 
     footer {
       margin-top: 4rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
+      font-size: 13px;
+      color: var(--footer);
+      letter-spacing: 0.04em;
       opacity: 0;
       animation: fadeUp 0.6s ease 0.3s forwards;
     }
 
-    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a { color: var(--footer); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
     @keyframes fadeUp {
@@ -259,6 +258,8 @@
       .card { padding: 1.25rem; }
       .input-row { flex-direction: column; }
       .btn-add { padding: 10px; }
+      header h1 { font-size: 24px; }
+      .result-text { font-size: 17px; }
     }
   </style>
 </head>
