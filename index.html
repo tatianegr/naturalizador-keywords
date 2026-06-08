@@ -290,7 +290,7 @@
 const keywords = [];
 
 const estados = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
-const cidades = ['sao paulo','são paulo','rio de janeiro','belo horizonte','curitiba','porto alegre','fortaleza','recife','salvador','manaus','campinas','santo andre','guarulhos','osasco','sorocaba','ribeirao preto','ribeirão preto','santos'];
+const cidades = ['São Paulo','Rio de Janeiro','Belo Horizonte','Curitiba','Porto Alegre','Fortaleza','Recife','Salvador','Manaus','Campinas','Santo André','Guarulhos','Osasco','Sorocaba','Ribeirão Preto','Santos'];
 
 // substantivos cujo complemento é naturalmente ligado por "de" (ex: "fornecedor de cabos")
 const precisaDe = new Set([
@@ -347,7 +347,7 @@ function artigo(nucleoTokens) {
 function detectarLocalizacao(tokens) {
   const joined = tokens.join(' ');
   for (const c of cidades) {
-    if (joined.includes(c)) return c.split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+    if (joined.includes(normalizar(c))) return c;
   }
   for (const t of tokens) {
     if (estados.includes(normalizar(t))) return t.toUpperCase();
@@ -382,7 +382,7 @@ function naturalizar(kw) {
   }
 
   if (nucleoTokens.length === 0) {
-    return localizacao ? localizacao.toLowerCase() : kw.toLowerCase();
+    return localizacao ? localizacao : kw.toLowerCase();
   }
 
   // pergunta solta no fim da keyword (ex: "eixo cardan para que serve") vai para o início
@@ -391,7 +391,7 @@ function naturalizar(kw) {
   if (padraoPergunta) {
     const resto = nucleoTokens.slice(0, nucleoTokens.length - padraoPergunta.length);
     const frase = `${padraoPergunta.join(' ')} ${artigo(resto)} ${resto.join(' ')}`;
-    return `${frase}${loc}`.toLowerCase();
+    return `${frase.toLowerCase()}${loc}`;
   }
 
   // procura uma palavra que pede complemento ligado por "de" em qualquer posição
@@ -418,7 +418,7 @@ function naturalizar(kw) {
     frase = nucleoTokens.join(' ');
   }
 
-  return `${frase}${loc}`.toLowerCase();
+  return `${frase.toLowerCase()}${loc}`;
 }
 
 // UI
