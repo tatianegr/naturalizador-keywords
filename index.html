@@ -326,8 +326,6 @@ function detectarLocalizacao(tokens) {
   return null;
 }
 
-function capitalize(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
-
 function naturalizar(kw) {
   const tokens = kw.trim().split(/\s+/);
   const norm = tokens.map(normalizar);
@@ -355,7 +353,7 @@ function naturalizar(kw) {
   }
 
   if (nucleoTokens.length === 0) {
-    return localizacao ? capitalize(localizacao) : kw;
+    return localizacao ? localizacao.toLowerCase() : kw.toLowerCase();
   }
 
   // procura uma palavra que pede complemento ligado por "de" em qualquer posição
@@ -382,7 +380,7 @@ function naturalizar(kw) {
     frase = nucleoTokens.join(' ');
   }
 
-  return capitalize(`${frase}${loc}`);
+  return `${frase}${loc}`.toLowerCase();
 }
 
 // UI
