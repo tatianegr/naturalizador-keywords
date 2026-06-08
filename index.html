@@ -300,6 +300,17 @@ const precisaDe = new Set([
   'aluguel','conserto','reparo','reparos','troca','venda','vendas','fornecimento',
 ]);
 
+// alvos/aplicações que naturalmente vêm ligados por "para" (ex: "tapete para carro")
+const aplicacoes = new Set([
+  'carro','carros','moto','motos','caminhao','caminhoes','onibus','van','vans',
+  'bicicleta','bicicletas','celular','celulares','smartphone','smartphones',
+  'notebook','notebooks','computador','computadores','tv','tvs','geladeira','geladeiras',
+  'casa','casas','apartamento','apartamentos','escritorio','escritorios',
+  'cozinha','cozinhas','banheiro','banheiros','quarto','quartos','jardim','jardins',
+  'pet','pets','cachorro','cachorros','gato','gatos','bebe','bebes',
+  'idoso','idosos','crianca','criancas','academia','academias','escola','escolas',
+]);
+
 function normalizar(str) {
   return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'');
 }
@@ -358,6 +369,15 @@ function naturalizar(kw) {
     // evita "fornecedor de de cabos" quando a keyword já traz o "de"
     resto = resto.replace(/^de\s+/i, '');
     frase = resto ? `${headWord} de ${resto}` : headWord;
+  } else if (
+    nucleoTokens.length > 1 &&
+    aplicacoes.has(normalizar(nucleoTokens[nucleoTokens.length-1])) &&
+    !['para','pra','de','do','da'].includes(normalizar(nucleoTokens[nucleoTokens.length-2]))
+  ) {
+    // ex: "eixo cardan carro" -> "eixo cardan para carro"
+    const alvo = nucleoTokens[nucleoTokens.length-1];
+    const principal = nucleoTokens.slice(0,-1).join(' ');
+    frase = `${principal} para ${alvo}`;
   } else {
     frase = nucleoTokens.join(' ');
   }
