@@ -360,14 +360,20 @@ function naturalizar(kw) {
     return localizacao ? capitalize(localizacao) : kw;
   }
 
-  const cabeca = normalizar(nucleoTokens[0]);
-  let resto = nucleoTokens.slice(1).join(' ');
-  // evita "fornecedor de de cabos" quando a keyword já traz o "de"
-  resto = resto.replace(/^de\s+/i, '');
+  // procura uma palavra que pede complemento ligado por "de" em qualquer posição
+  // (ex: "cabo elétrico preço" -> "preço de cabo elétrico")
+  const headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
-  const frase = (precisaDe.has(cabeca) && resto)
-    ? `${nucleoTokens[0]} de ${resto}`
-    : nucleoTokens.join(' ');
+  let frase;
+  if (headIdx !== -1) {
+    const headWord = nucleoTokens[headIdx];
+    let resto = nucleoTokens.filter((_, i) => i !== headIdx).join(' ');
+    // evita "fornecedor de de cabos" quando a keyword já traz o "de"
+    resto = resto.replace(/^de\s+/i, '');
+    frase = resto ? `${headWord} de ${resto}` : headWord;
+  } else {
+    frase = nucleoTokens.join(' ');
+  }
 
   return capitalize(`${frase}${loc}`);
 }
