@@ -279,7 +279,7 @@
 <header>
   <p class="eyebrow">ferramenta SEO</p>
   <h1>Naturalizador de Keywords</h1>
-  <p>Cole uma palavra-chave SEO e receba variações gramaticalmente naturais para usar no seu texto.</p>
+  <p>Cole uma palavra-chave SEO e receba a versão naturalizada, com conectivos, para usar no seu texto.</p>
 </header>
 
 <div class="card">
@@ -301,40 +301,20 @@
 <script>
 const keywords = [];
 
-const intencoes = {
-  comprar:'comprar',compre:'comprar',compra:'comprar',adquirir:'adquirir',
-  preco:'preco',preço:'preco',valor:'preco',valores:'preco',custo:'preco',custos:'preco',
-  barato:'barato',baratos:'barato',economico:'barato',econômico:'barato',economica:'barato',
-  econômica:'barato',acessivel:'barato',acessível:'barato',promocao:'preco',promoção:'preco',
-  orcamento:'orcamento',orçamento:'orcamento',cotacao:'orcamento',cotação:'orcamento',
-  melhor:'qualidade',melhores:'qualidade',qualidade:'qualidade',premium:'qualidade',top:'qualidade',
-  fornecedor:'fornecedor',fornecedores:'fornecedor',fabricante:'fornecedor',fabricantes:'fornecedor',
-  distribuidor:'fornecedor',distribuidores:'fornecedor',loja:'fornecedor',lojas:'fornecedor',
-  empresa:'fornecedor',empresas:'fornecedor',especialista:'fornecedor',especialistas:'fornecedor',
-  instalacao:'servico',instalação:'servico',instalar:'servico',instaladora:'servico',
-  servico:'servico',serviço:'servico',servicos:'servico',serviços:'servico',
-  manutencao:'servico',manutenção:'servico',
-  contato:'contato',contratar:'contato',
-};
-
 const estados = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
 const cidades = ['sao paulo','são paulo','rio de janeiro','belo horizonte','curitiba','porto alegre','fortaleza','recife','salvador','manaus','campinas','santo andre','guarulhos','osasco','sorocaba','ribeirao preto','ribeirão preto','santos'];
 
-function pluralizar(word) {
-  const w = word.toLowerCase();
-  if (w.endsWith('ção')||w.endsWith('são')) return word.slice(0,-2)+'ões';
-  if (w.endsWith('al')) return word.slice(0,-2)+'ais';
-  if (w.endsWith('el')) return word.slice(0,-2)+'éis';
-  if (w.endsWith('ol')) return word.slice(0,-2)+'óis';
-  if (w.endsWith('ul')) return word.slice(0,-2)+'uis';
-  if (w.endsWith('il')) return word.slice(0,-2)+'is';
-  if (w.endsWith('m')) return word.slice(0,-1)+'ns';
-  if (w.endsWith('r')||w.endsWith('s')||w.endsWith('z')) return word+'es';
-  return word+'s';
-}
+// substantivos cujo complemento é naturalmente ligado por "de" (ex: "fornecedor de cabos")
+const precisaDe = new Set([
+  'fornecedor','fornecedores','fabricante','fabricantes','distribuidor','distribuidores',
+  'loja','lojas','empresa','empresas','especialista','especialistas',
+  'instalacao','instalador','instaladora','manutencao','servico','servicos',
+  'preco','precos','valor','valores','orcamento','cotacao','tabela',
+  'aluguel','conserto','reparo','reparos','troca','venda','vendas','fornecimento',
+]);
 
 function normalizar(str) {
-  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
+  return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'');
 }
 
 function detectarLocalizacao(tokens) {
@@ -348,104 +328,48 @@ function detectarLocalizacao(tokens) {
   return null;
 }
 
-function artigoFeminino(palavra) {
-  const femininas = ['empresa','loja','instalação','instalacao','manutenção','manutencao','cotação','cotacao','qualidade','solução','solucao'];
-  const norm = normalizar(palavra);
-  if (femininas.some(f=>norm.includes(f))) return true;
-  if (norm.endsWith('a')||norm.endsWith('ção')||norm.endsWith('cao')||norm.endsWith('são')||norm.endsWith('sao')||norm.endsWith('dade')) return true;
-  return false;
-}
-
 function capitalize(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
 
 function naturalizar(kw) {
   const tokens = kw.trim().split(/\s+/);
   const norm = tokens.map(normalizar);
-  let intencao=null, intencaoTipo=null;
   const localizacao = detectarLocalizacao(norm);
-  let nucleoTokens = [];
 
+  let nucleoTokens = [];
   for (let i=0;i<tokens.length;i++) {
     const n = norm[i];
-    if (intencoes[n]&&!intencao) { intencao=tokens[i]; intencaoTipo=intencoes[n]; }
-    else if (estados.includes(n)||(localizacao&&localizacao.toLowerCase().includes(tokens[i].toLowerCase()))) {}
-    else { nucleoTokens.push(tokens[i]); }
+    if (estados.includes(n)||(localizacao&&localizacao.toLowerCase().includes(tokens[i].toLowerCase()))) continue;
+    nucleoTokens.push(tokens[i]);
   }
-
   if (localizacao) {
     const locNorm = normalizar(localizacao);
     nucleoTokens = nucleoTokens.filter(t=>!locNorm.includes(normalizar(t)));
   }
 
-  const nucleo = nucleoTokens.join(' ');
-  const nucleoPlural = nucleoTokens.map((t,i)=>i===nucleoTokens.length-1?pluralizar(t):t).join(' ');
-  const fem = artigoFeminino(nucleo);
-  const artDef = fem?'a':'o';
-  const artIndef = fem?'uma':'um';
-  const artDefPl = fem?'as':'os';
-  const loc = localizacao?(estados.includes(normalizar(localizacao))?` em ${localizacao}`:` em ${localizacao}`):'';
+  const loc = localizacao ? ` em ${localizacao}` : '';
 
-  const sugestoes = new Set();
-
-  if (!intencaoTipo||intencaoTipo==='fornecedor') {
-    sugestoes.add(capitalize(`${nucleoPlural}${loc}`));
-    sugestoes.add(capitalize(`fornecedor de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`onde comprar ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${artDefPl} melhores ${nucleoPlural}${loc}`));
-    sugestoes.add(capitalize(`empresa de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`distribuidor de ${nucleo}${loc}`));
-  }
-  if (intencaoTipo==='preco') {
-    sugestoes.add(capitalize(`preço de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`quanto custa ${artIndef} ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`valor do ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${nucleo} com melhor preço${loc}`));
-    sugestoes.add(capitalize(`tabela de preços de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${nucleoPlural} por bom preço${loc}`));
-  }
-  if (intencaoTipo==='barato') {
-    sugestoes.add(capitalize(`${nucleo} barato${loc}`));
-    sugestoes.add(capitalize(`${nucleo} com preço acessível${loc}`));
-    sugestoes.add(capitalize(`onde encontrar ${nucleo} barato${loc}`));
-    sugestoes.add(capitalize(`${nucleoPlural} econômicos${loc}`));
-    sugestoes.add(capitalize(`melhor custo-benefício em ${nucleo}${loc}`));
-  }
-  if (intencaoTipo==='orcamento') {
-    sugestoes.add(capitalize(`orçamento de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`solicitar orçamento de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`cotação de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`pedir orçamento para ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`quanto custa contratar ${nucleo}${loc}`));
-  }
-  if (intencaoTipo==='qualidade') {
-    sugestoes.add(capitalize(`${nucleo} de qualidade${loc}`));
-    sugestoes.add(capitalize(`melhor ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${artDef} melhor ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${nucleoPlural} de alta qualidade${loc}`));
-    sugestoes.add(capitalize(`${nucleo} premium${loc}`));
-  }
-  if (intencaoTipo==='servico') {
-    sugestoes.add(capitalize(`serviço de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`empresa de ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`contratar ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${nucleo} profissional${loc}`));
-    sugestoes.add(capitalize(`quem faz ${nucleo}${loc}`));
-  }
-  if (intencaoTipo==='contato') {
-    sugestoes.add(capitalize(`contratar ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`entrar em contato com ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`falar com especialista em ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`onde contratar ${nucleo}${loc}`));
-  }
-  if (intencaoTipo==='comprar') {
-    sugestoes.add(capitalize(`comprar ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`onde comprar ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`adquirir ${nucleo}${loc}`));
-    sugestoes.add(capitalize(`${nucleo} à venda${loc}`));
-    sugestoes.add(capitalize(`loja de ${nucleo}${loc}`));
+  // remove conectivo que já ligava o núcleo à localização (ex: "...em sp" -> não duplicar "em")
+  const conectivosLoc = new Set(['em','no','na','para','de']);
+  if (localizacao) {
+    while (nucleoTokens.length && conectivosLoc.has(normalizar(nucleoTokens[nucleoTokens.length-1]))) {
+      nucleoTokens.pop();
+    }
   }
 
-  return [...sugestoes].slice(0,6);
+  if (nucleoTokens.length === 0) {
+    return localizacao ? capitalize(localizacao) : kw;
+  }
+
+  const cabeca = normalizar(nucleoTokens[0]);
+  let resto = nucleoTokens.slice(1).join(' ');
+  // evita "fornecedor de de cabos" quando a keyword já traz o "de"
+  resto = resto.replace(/^de\s+/i, '');
+
+  const frase = (precisaDe.has(cabeca) && resto)
+    ? `${nucleoTokens[0]} de ${resto}`
+    : nucleoTokens.join(' ');
+
+  return capitalize(`${frase}${loc}`);
 }
 
 // UI
@@ -485,7 +409,7 @@ function renderTags() {
 function run() {
   resultsEl.innerHTML='';
   keywords.forEach((kw,idx)=>{
-    const sugestoes=naturalizar(kw);
+    const naturalizada=naturalizar(kw);
     const card=document.createElement('div');
     card.className='result-card';
     card.style.animationDelay=`${idx*0.08}s`;
@@ -493,25 +417,25 @@ function run() {
     origin.className='result-origin';
     origin.textContent=`"${kw}"`;
     card.appendChild(origin);
-    sugestoes.forEach(s=>{
-      const row=document.createElement('div');
-      row.className='suggestion';
-      const span=document.createElement('span');
-      span.textContent=s;
-      const btn=document.createElement('button');
-      btn.className='btn-copy';
-      btn.textContent='copiar';
-      btn.onclick=()=>{
-        navigator.clipboard.writeText(s).then(()=>{
-          btn.textContent='copiado ✓';
-          btn.classList.add('copied');
-          setTimeout(()=>{ btn.textContent='copiar'; btn.classList.remove('copied'); },1800);
-        });
-      };
-      row.appendChild(span);
-      row.appendChild(btn);
-      card.appendChild(row);
-    });
+
+    const row=document.createElement('div');
+    row.className='suggestion';
+    const span=document.createElement('span');
+    span.textContent=naturalizada;
+    const btn=document.createElement('button');
+    btn.className='btn-copy';
+    btn.textContent='copiar';
+    btn.onclick=()=>{
+      navigator.clipboard.writeText(naturalizada).then(()=>{
+        btn.textContent='copiado ✓';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent='copiar'; btn.classList.remove('copied'); },1800);
+      });
+    };
+    row.appendChild(span);
+    row.appendChild(btn);
+    card.appendChild(row);
+
     resultsEl.appendChild(card);
   });
 }
