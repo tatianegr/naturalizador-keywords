@@ -132,7 +132,6 @@
       flex-wrap: wrap;
       gap: 6px;
       min-height: 28px;
-      margin-bottom: 1.5rem;
     }
 
     .tag {
@@ -168,25 +167,6 @@
       font-style: italic;
       padding: 4px 0;
     }
-
-    .btn-run {
-      width: 100%;
-      padding: 11px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: #0f0f0f;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      letter-spacing: 0.01em;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-
-    .btn-run:hover { opacity: 0.9; }
-    .btn-run:active { transform: scale(0.99); }
-    .btn-run:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
     .results {
       width: 100%;
@@ -299,7 +279,6 @@
   <div class="tags" id="tags">
     <span class="empty-msg" id="emptyMsg">Nenhuma keyword adicionada ainda.</span>
   </div>
-  <button class="btn-run" id="runBtn" onclick="run()" disabled>Naturalizar keywords</button>
 </div>
 
 <div class="results" id="resultsEl"></div>
@@ -390,7 +369,6 @@ function naturalizar(kw) {
 const input = document.getElementById('kwInput');
 const tagsEl = document.getElementById('tags');
 const emptyMsg = document.getElementById('emptyMsg');
-const runBtn = document.getElementById('runBtn');
 const resultsEl = document.getElementById('resultsEl');
 
 input.addEventListener('keydown', e=>{ if(e.key==='Enter') addKeyword(); });
@@ -401,17 +379,18 @@ function addKeyword() {
   keywords.push(val);
   input.value='';
   renderTags();
+  run();
 }
 
 function removeKeyword(idx) {
   keywords.splice(idx,1);
   renderTags();
+  run();
 }
 
 function renderTags() {
   tagsEl.innerHTML='';
-  if (keywords.length===0) { tagsEl.appendChild(emptyMsg); runBtn.disabled=true; return; }
-  runBtn.disabled=false;
+  if (keywords.length===0) { tagsEl.appendChild(emptyMsg); return; }
   keywords.forEach((kw,i)=>{
     const tag=document.createElement('div');
     tag.className='tag';
