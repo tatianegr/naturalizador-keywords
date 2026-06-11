@@ -611,9 +611,10 @@ function naturalizar(kw) {
   let headIdx = nucleoTokens.findIndex(t => precoWords.has(normalizar(t)));
   if (headIdx === -1) headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
-  // se a palavra-chave já liga o termo ao complemento com "de", a frase já é natural
-  // (ex: "manutenção de carros blindados" não deve virar "manutenção de manutenção de carros blindados")
-  if (headIdx !== -1 && normalizar(nucleoTokens[headIdx+1] || '') === 'de') {
+  // se a palavra-chave já liga o termo ao complemento com "de"/"da"/"do" etc., a frase já é natural
+  // (ex: "manutenção de carros blindados", "preço da película antivandalismo")
+  const ligacoesDe = new Set(['de','da','do','das','dos']);
+  if (headIdx !== -1 && ligacoesDe.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
     headIdx = -1;
   }
 
