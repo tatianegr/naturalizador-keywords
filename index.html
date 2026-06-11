@@ -587,8 +587,14 @@ const palavrasComuns = new Set([
 // se vierem acompanhadas de outra palavra desconhecida em seguida
 const ambiguosLocal = new Set(['jardim','jardins','vila','parque']);
 
-// capitaliza o nome próprio (bairro, região, etc.) que aparece após "em/no/na" quando
-// não é uma palavra (ou sequência de palavras) conhecida do vocabulário comum
+// substantivos que indicam que o que vem a seguir (ligado por "do/da/dos/das") é um nome de lugar
+// (ex: "bairro do ipiranga" -> "bairro do Ipiranga")
+const palavrasLugar = new Set(['bairro','bairros','regiao','regioes','zona','zonas','distrito','distritos']);
+const ligacoesLugar = new Set(['do','da','dos','das']);
+
+// capitaliza o nome próprio (bairro, região, etc.) que aparece após "em/no/na" (ou após
+// "bairro do/região da") quando não é uma palavra (ou sequência de palavras) conhecida
+// do vocabulário comum
 // (ex: "funilaria no ipiranga" -> "funilaria no Ipiranga", "oficina no jardim paulista" -> "oficina no Jardim Paulista")
 function capitalizarLocalDesconhecido(frase) {
   const partes = frase.split(' ');
@@ -601,7 +607,9 @@ function capitalizarLocalDesconhecido(frase) {
   if (i >= 0 && i < partes.length - 1 && ambiguosLocal.has(normalizar(partes[i]))) {
     i--;
   }
-  if (i >= 0 && i < partes.length - 1 && preposicoesLocal.has(normalizar(partes[i]))) {
+  const ehPreposicaoLocal = i >= 0 && preposicoesLocal.has(normalizar(partes[i]));
+  const ehLigacaoLugar = i > 0 && ligacoesLugar.has(normalizar(partes[i])) && palavrasLugar.has(normalizar(partes[i-1]));
+  if (i < partes.length - 1 && (ehPreposicaoLocal || ehLigacaoLugar)) {
     for (let j = i+1; j < partes.length; j++) {
       partes[j] = partes[j].charAt(0).toUpperCase() + partes[j].slice(1);
     }
@@ -662,7 +670,13 @@ function naturalizar(kw) {
   }
 
   let frase;
-  if (headIdx !== -1) {
+  if (headIdx !== -1 && headIdx > 0 && headIdx < nucleoTokens.length - 1) {
+    // a palavra-chave (ex: "reparos") está no meio da frase, com modificadores antes
+    // (ex: "pequenos reparos funilaria" -> "pequenos reparos de funilaria", sem reordenar)
+    const antes = nucleoTokens.slice(0, headIdx + 1).join(' ');
+    const depois = nucleoTokens.slice(headIdx + 1).join(' ');
+    frase = `${antes} de ${depois}`;
+  } else if (headIdx !== -1) {
     const headWord = nucleoTokens[headIdx];
     let resto = nucleoTokens.filter((_, i) => i !== headIdx).join(' ');
     // evita "fornecedor de de cabos" quando a keyword já traz o "de"
