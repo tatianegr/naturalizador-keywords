@@ -611,10 +611,10 @@ function naturalizar(kw) {
   let headIdx = nucleoTokens.findIndex(t => precoWords.has(normalizar(t)));
   if (headIdx === -1) headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
-  // se a palavra-chave já liga o termo ao complemento com "de"/"da"/"do" etc., a frase já é natural
-  // (ex: "manutenção de carros blindados", "preço da película antivandalismo")
-  const ligacoesDe = new Set(['de','da','do','das','dos']);
-  if (headIdx !== -1 && ligacoesDe.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
+  // se a palavra-chave já liga o termo a um conectivo (de/da/para/em/com/etc.), a frase já é natural
+  // (ex: "manutenção de carros blindados", "preço da película antivandalismo", "fornecedor para empresas")
+  const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e']);
+  if (headIdx !== -1 && conectivos.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
     headIdx = -1;
   }
 
@@ -628,7 +628,7 @@ function naturalizar(kw) {
   } else if (
     nucleoTokens.length > 1 &&
     aplicacoes.has(normalizar(nucleoTokens[nucleoTokens.length-1])) &&
-    !['para','pra','de','do','da'].includes(normalizar(nucleoTokens[nucleoTokens.length-2]))
+    !conectivos.has(normalizar(nucleoTokens[nucleoTokens.length-2]))
   ) {
     // ex: "eixo cardan carro" -> "eixo cardan para carro"
     const alvo = nucleoTokens[nucleoTokens.length-1];
