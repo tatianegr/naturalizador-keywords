@@ -175,10 +175,27 @@
       padding: 4px 0;
     }
 
-    .results {
+    .results-wrap {
       width: 100%;
       max-width: 560px;
       margin-top: 1.5rem;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .results-title {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .results {
+      width: 100%;
       display: flex;
       flex-direction: column;
     }
@@ -186,7 +203,6 @@
     .result-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 20px;
       background: var(--output-bg);
       border: 1px solid var(--border);
@@ -298,7 +314,13 @@
   </div>
 </div>
 
-<div class="results" id="resultsEl"></div>
+<div class="results-wrap" id="resultsWrap" style="display:none">
+  <div class="results-header">
+    <span class="results-title">Resultado</span>
+    <button class="btn-copy" id="btnCopyAll">copiar tudo</button>
+  </div>
+  <div class="results" id="resultsEl"></div>
+</div>
 
 <footer>feito por <a href="https://www.linkedin.com/in/tati-redatora/" target="_blank">tati redatora</a></footer>
 
@@ -446,6 +468,8 @@ const input = document.getElementById('kwInput');
 const tagsEl = document.getElementById('tags');
 const emptyMsg = document.getElementById('emptyMsg');
 const resultsEl = document.getElementById('resultsEl');
+const resultsWrap = document.getElementById('resultsWrap');
+const btnCopyAll = document.getElementById('btnCopyAll');
 
 input.addEventListener('keydown', e=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); addKeyword(); } });
 
@@ -478,13 +502,19 @@ function renderTags() {
 
 function run() {
   resultsEl.innerHTML='';
-  keywords.forEach((kw, i)=>{
+
+  if (keywords.length === 0) {
+    resultsWrap.style.display = 'none';
+    return;
+  }
+  resultsWrap.style.display = '';
+
+  const naturalizadas = keywords.map(kw=>{
     const naturalizada=naturalizar(kw);
     const alterada = naturalizada !== kw.trim().toLowerCase();
 
     const row=document.createElement('div');
     row.className = alterada ? 'result-row' : 'result-row unchanged';
-    row.style.animationDelay=`${i*0.08}s`;
 
     const body=document.createElement('div');
     body.className='result-body';
@@ -500,20 +530,17 @@ function run() {
     body.appendChild(text);
     row.appendChild(body);
 
-    const btn=document.createElement('button');
-    btn.className='btn-copy';
-    btn.textContent='copiar';
-    btn.onclick=()=>{
-      navigator.clipboard.writeText(naturalizada).then(()=>{
-        btn.textContent='copiado ✓';
-        btn.classList.add('copied');
-        setTimeout(()=>{ btn.textContent='copiar'; btn.classList.remove('copied'); },1800);
-      });
-    };
-    row.appendChild(btn);
-
     resultsEl.appendChild(row);
+    return naturalizada;
   });
+
+  btnCopyAll.onclick=()=>{
+    navigator.clipboard.writeText(naturalizadas.join('\n')).then(()=>{
+      btnCopyAll.textContent='copiado ✓';
+      btnCopyAll.classList.add('copied');
+      setTimeout(()=>{ btnCopyAll.textContent='copiar tudo'; btnCopyAll.classList.remove('copied'); },1800);
+    });
+  };
 }
 </script>
 </body>
