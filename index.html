@@ -582,13 +582,23 @@ const palavrasComuns = new Set([
   'domicilio','local','geral','online','centro','interior','exterior','setor','sistema',
 ]);
 
+// palavras comuns que também costumam abrir nomes de bairros/regiões
+// (ex: "Jardim Paulista", "Vila Mariana") — só viram parte do nome próprio
+// se vierem acompanhadas de outra palavra desconhecida em seguida
+const ambiguosLocal = new Set(['jardim','jardins','vila','parque']);
+
 // capitaliza o nome próprio (bairro, região, etc.) que aparece após "em/no/na" quando
 // não é uma palavra (ou sequência de palavras) conhecida do vocabulário comum
-// (ex: "funilaria no ipiranga" -> "funilaria no Ipiranga", "oficina na vila mariana" -> "oficina na Vila Mariana")
+// (ex: "funilaria no ipiranga" -> "funilaria no Ipiranga", "oficina no jardim paulista" -> "oficina no Jardim Paulista")
 function capitalizarLocalDesconhecido(frase) {
   const partes = frase.split(' ');
   let i = partes.length - 1;
   while (i >= 0 && !palavrasComuns.has(normalizar(partes[i]))) {
+    i--;
+  }
+  // se houver pelo menos uma palavra desconhecida no fim e a palavra anterior for
+  // ambígua (ex: "jardim"), considera que ela faz parte do nome do lugar
+  if (i >= 0 && i < partes.length - 1 && ambiguosLocal.has(normalizar(partes[i]))) {
     i--;
   }
   if (i >= 0 && i < partes.length - 1 && preposicoesLocal.has(normalizar(partes[i]))) {
