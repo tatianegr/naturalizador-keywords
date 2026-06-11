@@ -564,6 +564,38 @@ function detectarLocalizacao(tokens) {
   return null;
 }
 
+const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
+const precoWords = new Set(['preco','precos','valor','valores','orcamento','cotacao','tabela']);
+const preposicoesLocal = new Set(['em','no','na','nos','nas']);
+
+// vocabulário "comum" conhecido pela ferramenta — qualquer outra palavra após uma
+// preposição de lugar (em/no/na) é tratada como nome próprio (bairro, região, etc.)
+const palavrasComuns = new Set([
+  ...conectivos,
+  ...precoWords,
+  ...precisaDe,
+  ...aplicacoes,
+  ...perguntas.flat(),
+  ...estados,
+  ...Object.keys(correcoesAcento),
+  ...Object.values(correcoesAcento).map(normalizar),
+  'domicilio','local','geral','online','centro','interior','exterior','setor','sistema',
+]);
+
+// capitaliza o nome próprio (bairro, região, etc.) que aparece após "em/no/na"
+// quando não é uma palavra conhecida do vocabulário comum
+// (ex: "funilaria no ipiranga" -> "funilaria no Ipiranga")
+function capitalizarLocalDesconhecido(frase) {
+  const partes = frase.split(' ');
+  if (partes.length < 2) return frase;
+  const ultima = partes[partes.length-1];
+  const penultima = normalizar(partes[partes.length-2]);
+  if (preposicoesLocal.has(penultima) && !palavrasComuns.has(normalizar(ultima))) {
+    partes[partes.length-1] = ultima.charAt(0).toUpperCase() + ultima.slice(1);
+  }
+  return partes.join(' ');
+}
+
 function naturalizar(kw) {
   const tokens = kw.trim().split(/\s+/).map(t => correcoesAcento[normalizar(t)] || t);
   const norm = tokens.map(normalizar);
@@ -591,7 +623,7 @@ function naturalizar(kw) {
   }
 
   if (nucleoTokens.length === 0) {
-    return localizacao ? localizacao : kw.toLowerCase();
+    return localizacao ? localizacao : capitalizarLocalDesconhecido(kw.toLowerCase());
   }
 
   // pergunta solta no fim da keyword (ex: "eixo cardan para que serve") vai para o início
@@ -600,20 +632,18 @@ function naturalizar(kw) {
   if (padraoPergunta) {
     const resto = nucleoTokens.slice(0, nucleoTokens.length - padraoPergunta.length);
     const frase = `${padraoPergunta.join(' ')} ${artigo(resto)} ${resto.join(' ')}`;
-    return `${frase.toLowerCase()}${loc}`;
+    return `${capitalizarLocalDesconhecido(frase.toLowerCase())}${loc}`;
   }
 
   // procura uma palavra que pede complemento ligado por "de" em qualquer posição
   // (ex: "cabo elétrico preço" -> "preço de cabo elétrico")
   // palavras de preço/orçamento têm prioridade: governam a frase mesmo se vierem no fim
   // (ex: "reparo de eixo cardan industrial preço" -> "preço de reparo de eixo cardan industrial")
-  const precoWords = new Set(['preco','precos','valor','valores','orcamento','cotacao','tabela']);
   let headIdx = nucleoTokens.findIndex(t => precoWords.has(normalizar(t)));
   if (headIdx === -1) headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
   // se a palavra-chave já liga o termo a um conectivo (de/da/para/em/com/etc.), a frase já é natural
   // (ex: "manutenção de carros blindados", "preço da película antivandalismo", "fornecedor para empresas")
-  const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
   if (headIdx !== -1 && conectivos.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
     headIdx = -1;
   }
@@ -638,7 +668,7 @@ function naturalizar(kw) {
     frase = nucleoTokens.join(' ');
   }
 
-  return `${frase.toLowerCase()}${loc}`;
+  return `${capitalizarLocalDesconhecido(frase.toLowerCase())}${loc}`;
 }
 
 // UI
