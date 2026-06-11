@@ -93,12 +93,15 @@
 
     .input-row {
       display: flex;
+      flex-direction: column;
       gap: 8px;
       margin-bottom: 1rem;
     }
 
-    input[type="text"] {
-      flex: 1;
+    textarea#kwInput {
+      width: 100%;
+      resize: vertical;
+      min-height: 64px;
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -106,19 +109,21 @@
       font-family: Arial, sans-serif;
       font-size: 16px;
       font-weight: 400;
+      line-height: 1.5;
       color: var(--text);
       outline: none;
       transition: border-color 0.2s;
     }
 
-    input[type="text"]::placeholder { color: var(--muted); }
-    input[type="text"]:focus { border-color: var(--accent); }
+    textarea#kwInput::placeholder { color: var(--muted); }
+    textarea#kwInput:focus { border-color: var(--accent); }
 
     .btn-add {
+      align-self: flex-end;
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 0 16px;
+      padding: 8px 16px;
       color: var(--muted);
       font-family: Arial, sans-serif;
       font-size: 15px;
@@ -256,8 +261,6 @@
 
     @media (max-width: 480px) {
       .card { padding: 1.25rem; }
-      .input-row { flex-direction: column; }
-      .btn-add { padding: 10px; }
       header h1 { font-size: 24px; }
       .result-text { font-size: 17px; }
     }
@@ -274,7 +277,7 @@
 <div class="card">
   <p class="field-label">Palavras-chave</p>
   <div class="input-row">
-    <input type="text" id="kwInput" placeholder="ex: fornecedor cabo elétrico sp" autocomplete="off" />
+    <textarea id="kwInput" placeholder="cole uma ou mais palavras-chave, uma por linha&#10;ex: fornecedor cabo elétrico sp" rows="3" autocomplete="off"></textarea>
     <button class="btn-add" onclick="addKeyword()">+ Adicionar</button>
   </div>
   <div class="tags" id="tags">
@@ -431,12 +434,13 @@ const tagsEl = document.getElementById('tags');
 const emptyMsg = document.getElementById('emptyMsg');
 const resultsEl = document.getElementById('resultsEl');
 
-input.addEventListener('keydown', e=>{ if(e.key==='Enter') addKeyword(); });
+input.addEventListener('keydown', e=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); addKeyword(); } });
 
 function addKeyword() {
-  const val = input.value.trim();
-  if (!val||keywords.includes(val)) { input.value=''; return; }
-  keywords.push(val);
+  const linhas = input.value.split('\n').map(l=>l.trim()).filter(Boolean);
+  linhas.forEach(val=>{
+    if (!keywords.includes(val)) keywords.push(val);
+  });
   input.value='';
   renderTags();
   run();
@@ -461,11 +465,15 @@ function renderTags() {
 
 function run() {
   resultsEl.innerHTML='';
-  keywords.forEach((kw,idx)=>{
+  let exibidos=0;
+  keywords.forEach((kw)=>{
     const naturalizada=naturalizar(kw);
+    if (naturalizada === kw.trim().toLowerCase()) return;
+
     const card=document.createElement('div');
     card.className='result-card';
-    card.style.animationDelay=`${idx*0.08}s`;
+    card.style.animationDelay=`${exibidos*0.08}s`;
+    exibidos++;
     const body=document.createElement('div');
     body.className='result-body';
     const origin=document.createElement('div');
@@ -492,6 +500,13 @@ function run() {
 
     resultsEl.appendChild(card);
   });
+
+  if (keywords.length>0 && exibidos===0) {
+    const msg=document.createElement('p');
+    msg.className='empty-msg';
+    msg.textContent='Nenhuma keyword precisou de ajuste — todas já estão naturais.';
+    resultsEl.appendChild(msg);
+  }
 }
 </script>
 </body>
