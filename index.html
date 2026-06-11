@@ -118,8 +118,13 @@
     textarea#kwInput::placeholder { color: var(--muted); }
     textarea#kwInput:focus { border-color: var(--accent); }
 
-    .btn-add {
+    .input-actions {
+      display: flex;
       align-self: flex-end;
+      gap: 8px;
+    }
+
+    .btn-add, .btn-clear {
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -133,6 +138,7 @@
     }
 
     .btn-add:hover { border-color: var(--accent); color: var(--text); background: var(--accent-dim); }
+    .btn-clear:hover { border-color: #d9534f; color: var(--text); background: rgba(217,83,79,0.12); }
 
     .tags {
       display: flex;
@@ -307,7 +313,10 @@
   <p class="field-label">Palavras-chave</p>
   <div class="input-row">
     <textarea id="kwInput" placeholder="cole uma ou mais palavras-chave, uma por linha&#10;ex: fornecedor cabo elétrico sp" rows="3" autocomplete="off"></textarea>
-    <button class="btn-add" onclick="addKeyword()">+ Adicionar</button>
+    <div class="input-actions">
+      <button class="btn-clear" onclick="limparKeywords()">limpar</button>
+      <button class="btn-add" onclick="addKeyword()">+ Adicionar</button>
+    </div>
   </div>
   <div class="tags" id="tags">
     <span class="empty-msg" id="emptyMsg">Nenhuma keyword adicionada ainda.</span>
@@ -647,6 +656,13 @@ function addKeyword() {
 
 function removeKeyword(idx) {
   keywords.splice(idx,1);
+  renderTags();
+  run();
+}
+
+function limparKeywords() {
+  keywords.length = 0;
+  input.value = '';
   renderTags();
   run();
 }
