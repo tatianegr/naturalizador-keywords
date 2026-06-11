@@ -613,7 +613,7 @@ function naturalizar(kw) {
 
   // se a palavra-chave já liga o termo a um conectivo (de/da/para/em/com/etc.), a frase já é natural
   // (ex: "manutenção de carros blindados", "preço da película antivandalismo", "fornecedor para empresas")
-  const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e']);
+  const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
   if (headIdx !== -1 && conectivos.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
     headIdx = -1;
   }
