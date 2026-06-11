@@ -181,27 +181,40 @@
       margin-top: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 12px;
     }
 
-    .result-card {
+    .result-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
       background: var(--output-bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.4rem;
+      border-bottom: none;
+      padding: 1rem 1.4rem;
       opacity: 0;
       animation: fadeUp 0.4s ease forwards;
-      transition: border-color 0.2s, transform 0.2s, background 0.2s;
+      transition: border-color 0.2s, background 0.2s;
     }
 
-    .result-card:hover {
+    .result-row:first-child {
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+    }
+
+    .result-row:last-child {
+      border-bottom: 1px solid var(--border);
+      border-bottom-left-radius: var(--radius);
+      border-bottom-right-radius: var(--radius);
+    }
+
+    .result-row:hover {
       border-color: var(--accent-hover);
       background: var(--panel-2);
-      transform: translateY(-1px);
+    }
+
+    .result-row.unchanged {
+      opacity: 0.7;
     }
 
     .result-body {
@@ -465,26 +478,27 @@ function renderTags() {
 
 function run() {
   resultsEl.innerHTML='';
-  let exibidos=0;
-  keywords.forEach((kw)=>{
+  keywords.forEach((kw, i)=>{
     const naturalizada=naturalizar(kw);
-    if (naturalizada === kw.trim().toLowerCase()) return;
+    const alterada = naturalizada !== kw.trim().toLowerCase();
 
-    const card=document.createElement('div');
-    card.className='result-card';
-    card.style.animationDelay=`${exibidos*0.08}s`;
-    exibidos++;
+    const row=document.createElement('div');
+    row.className = alterada ? 'result-row' : 'result-row unchanged';
+    row.style.animationDelay=`${i*0.08}s`;
+
     const body=document.createElement('div');
     body.className='result-body';
-    const origin=document.createElement('div');
-    origin.className='result-origin';
-    origin.textContent=`"${kw}"`;
+    if (alterada) {
+      const origin=document.createElement('div');
+      origin.className='result-origin';
+      origin.textContent=`"${kw}"`;
+      body.appendChild(origin);
+    }
     const text=document.createElement('div');
     text.className='result-text';
     text.textContent=naturalizada;
-    body.appendChild(origin);
     body.appendChild(text);
-    card.appendChild(body);
+    row.appendChild(body);
 
     const btn=document.createElement('button');
     btn.className='btn-copy';
@@ -496,17 +510,10 @@ function run() {
         setTimeout(()=>{ btn.textContent='copiar'; btn.classList.remove('copied'); },1800);
       });
     };
-    card.appendChild(btn);
+    row.appendChild(btn);
 
-    resultsEl.appendChild(card);
+    resultsEl.appendChild(row);
   });
-
-  if (keywords.length>0 && exibidos===0) {
-    const msg=document.createElement('p');
-    msg.className='empty-msg';
-    msg.textContent='Nenhuma keyword precisou de ajuste — todas já estão naturais.';
-    resultsEl.appendChild(msg);
-  }
 }
 </script>
 </body>
