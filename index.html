@@ -534,7 +534,33 @@ const correcoesAcento = {
   'decimo':'décimo','decima':'décima','terco':'terço',
   'maximo':'máximo','maxima':'máxima','minimo':'mínimo','minima':'mínima',
   'medio':'médio','media':'média','medios':'médios','medias':'médias',
+
+  // palavras curtas/irregulares comuns
+  'nao':'não','mao':'mão','maos':'mãos',
+  'cha':'chá','chas':'chás','cafe':'café','cafes':'cafés',
+  'voce':'você','voces':'vocês','alem':'além','parabens':'parabéns',
+  'varios':'vários','varias':'várias',
+  'proprio':'próprio','propria':'própria','proprios':'próprios','proprias':'próprias',
+  'util':'útil','uteis':'úteis','habil':'hábil','habeis':'hábeis',
 };
+
+// regras gerais para terminações comuns do português que costumam vir sem acento
+// (ex: "operacao" -> "operação", "regiao" -> "região", "importancia" -> "importância")
+function aplicarRegraSufixo(p) {
+  if (p.length > 4 && p.endsWith('coes')) return p.slice(0,-4) + 'ções';
+  if (p.length > 3 && p.endsWith('cao')) return p.slice(0,-3) + 'ção';
+  if (p.length > 4 && p.endsWith('soes')) return p.slice(0,-4) + 'sões';
+  if (p.length > 3 && p.endsWith('sao')) return p.slice(0,-3) + 'são';
+  if (p.length > 4 && p.endsWith('ioes')) return p.slice(0,-4) + 'iões';
+  if (p.length > 3 && p.endsWith('iao')) return p.slice(0,-3) + 'ião';
+  if (p.length > 6 && p.endsWith('encias')) return p.slice(0,-6) + 'ências';
+  if (p.length > 5 && p.endsWith('encia')) return p.slice(0,-5) + 'ência';
+  if (p.length > 6 && p.endsWith('ancias')) return p.slice(0,-6) + 'âncias';
+  if (p.length > 5 && p.endsWith('ancia')) return p.slice(0,-5) + 'ância';
+  if (p.length > 5 && p.endsWith('ancas')) return p.slice(0,-5) + 'anças';
+  if (p.length > 4 && p.endsWith('anca')) return p.slice(0,-4) + 'ança';
+  return null;
+}
 
 
 function normalizar(str) {
@@ -619,7 +645,10 @@ function capitalizarLocalDesconhecido(frase) {
 }
 
 function naturalizar(kw) {
-  const tokens = kw.trim().split(/\s+/).map(t => correcoesAcento[normalizar(t)] || t);
+  const tokens = kw.trim().split(/\s+/).map(t => {
+    const n = normalizar(t);
+    return correcoesAcento[n] || aplicarRegraSufixo(n) || t;
+  });
   const norm = tokens.map(normalizar);
   const localizacao = detectarLocalizacao(norm);
 
@@ -666,7 +695,10 @@ function naturalizar(kw) {
 
   // se a palavra-chave já liga o termo a um conectivo (de/da/para/em/com/etc.), a frase já é natural
   // (ex: "manutenção de carros blindados", "preço da película antivandalismo", "fornecedor para empresas")
-  if (headIdx !== -1 && conectivos.has(normalizar(nucleoTokens[headIdx+1] || ''))) {
+  if (headIdx !== -1 && (
+    conectivos.has(normalizar(nucleoTokens[headIdx+1] || '')) ||
+    conectivos.has(normalizar(nucleoTokens[headIdx-1] || ''))
+  )) {
     headIdx = -1;
   }
 
