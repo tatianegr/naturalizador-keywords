@@ -705,13 +705,21 @@ function naturalizar(kw) {
 
   // palavras como "empresa"/"loja" no fim da frase, com um conectivo antes em outro ponto
   // (ex: "cordão personalizado com logo empresa"), provavelmente já são complemento de
-  // outra palavra — não têm prioridade de palavra de preço, então não reestrutura
-  if (headIdx !== -1 && !isPreco && nucleoTokens.slice(0, headIdx).some(t => conectivos.has(normalizar(t)))) {
-    headIdx = -1;
+  // outra palavra — em vez de mover para o início, liga com "da"/"do" no lugar
+  // (ex: "cordão personalizado com logo da empresa")
+  let headComArtigo = false;
+  if (headIdx !== -1 && !isPreco && headIdx > 0 && nucleoTokens.slice(0, headIdx).some(t => conectivos.has(normalizar(t)))) {
+    headComArtigo = true;
   }
 
   let frase;
-  if (headIdx !== -1 && headIdx > 0 && headIdx < nucleoTokens.length - 1) {
+  if (headComArtigo) {
+    const antes = nucleoTokens.slice(0, headIdx).join(' ');
+    const headWord = nucleoTokens[headIdx];
+    const depois = nucleoTokens.slice(headIdx + 1).join(' ');
+    const conector = artigo([headWord]) === 'a' ? 'da' : 'do';
+    frase = depois ? `${antes} ${conector} ${headWord} ${depois}` : `${antes} ${conector} ${headWord}`;
+  } else if (headIdx !== -1 && headIdx > 0 && headIdx < nucleoTokens.length - 1) {
     // a palavra-chave (ex: "reparos") está no meio da frase, com modificadores antes
     // (ex: "pequenos reparos funilaria" -> "pequenos reparos de funilaria", sem reordenar)
     const antes = nucleoTokens.slice(0, headIdx + 1).join(' ');
