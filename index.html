@@ -691,6 +691,7 @@ function naturalizar(kw) {
   // palavras de preço/orçamento têm prioridade: governam a frase mesmo se vierem no fim
   // (ex: "reparo de eixo cardan industrial preço" -> "preço de reparo de eixo cardan industrial")
   let headIdx = nucleoTokens.findIndex(t => precoWords.has(normalizar(t)));
+  const isPreco = headIdx !== -1;
   if (headIdx === -1) headIdx = nucleoTokens.findIndex(t => precisaDe.has(normalizar(t)));
 
   // se a palavra-chave já liga o termo a um conectivo (de/da/para/em/com/etc.), a frase já é natural
@@ -699,6 +700,13 @@ function naturalizar(kw) {
     conectivos.has(normalizar(nucleoTokens[headIdx+1] || '')) ||
     conectivos.has(normalizar(nucleoTokens[headIdx-1] || ''))
   )) {
+    headIdx = -1;
+  }
+
+  // palavras como "empresa"/"loja" no fim da frase, com um conectivo antes em outro ponto
+  // (ex: "cordão personalizado com logo empresa"), provavelmente já são complemento de
+  // outra palavra — não têm prioridade de palavra de preço, então não reestrutura
+  if (headIdx !== -1 && !isPreco && nucleoTokens.slice(0, headIdx).some(t => conectivos.has(normalizar(t)))) {
     headIdx = -1;
   }
 
