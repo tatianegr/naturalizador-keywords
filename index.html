@@ -359,6 +359,12 @@ const aplicacoes = new Set([
   'idoso','idosos','crianca','criancas','academia','academias','escola','escolas',
 ]);
 
+// palavras que costumam vir soltas no fim da keyword mas precisam de "no"/"em" antes
+// (ex: "porta crachá personalizado atacado" -> "...no atacado")
+const comNo = new Set(['atacado','varejo']);
+const comEm = new Set(['promocao','promocoes','oferta','ofertas','liquidacao','liquidacoes','alta','baixa','conta']);
+
+
 // padrões de pergunta que aparecem soltos no fim da keyword e devem vir para o início
 // (ex: "eixo cardan para que serve" -> "para que serve o eixo cardan")
 const perguntas = [
@@ -602,6 +608,8 @@ const palavrasComuns = new Set([
   ...precoWords,
   ...precisaDe,
   ...aplicacoes,
+  ...comNo,
+  ...comEm,
   ...perguntas.flat(),
   ...estados,
   ...Object.keys(correcoesAcento),
@@ -740,6 +748,16 @@ function naturalizar(kw) {
     const alvo = nucleoTokens[nucleoTokens.length-1];
     const principal = nucleoTokens.slice(0,-1).join(' ');
     frase = `${principal} para ${alvo}`;
+  } else if (
+    nucleoTokens.length > 1 &&
+    (comNo.has(normalizar(nucleoTokens[nucleoTokens.length-1])) || comEm.has(normalizar(nucleoTokens[nucleoTokens.length-1]))) &&
+    !conectivos.has(normalizar(nucleoTokens[nucleoTokens.length-2]))
+  ) {
+    // ex: "porta crachá personalizado atacado" -> "...no atacado"
+    const ultimo = nucleoTokens[nucleoTokens.length-1];
+    const principal = nucleoTokens.slice(0,-1).join(' ');
+    const conector = comNo.has(normalizar(ultimo)) ? 'no' : 'em';
+    frase = `${principal} ${conector} ${ultimo}`;
   } else {
     frase = nucleoTokens.join(' ');
   }
