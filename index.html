@@ -338,13 +338,13 @@ const keywords = [];
 
 const estados = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
 const cidades = [
-  // regiões do Brasil — variantes com e sem hífen para cobrir ambas as grafias
-  'Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul',
-  // estados — nomes compostos primeiro para não ser engolidos por substrings
+  // estados — compostos primeiro (mais específicos), depois simples, depois regiões
   'Mato Grosso do Sul','Rio Grande do Norte','Rio Grande do Sul','Espírito Santo',
   'Santa Catarina','Mato Grosso','Minas Gerais','Distrito Federal',
   'Rondônia','Roraima','Tocantins','Pernambuco','Maranhão','Amazonas',
   'Alagoas','Sergipe','Paraíba','Paraná','Amapá','Goiás','Ceará','Bahia','Acre','Piauí',
+  // regiões — depois dos estados para não engolir substrings como "sul" em "Mato Grosso do Sul"
+  'Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul',
   // cidades
   'São Paulo','Rio de Janeiro','Belo Horizonte','Curitiba','Porto Alegre',
   'Fortaleza','Recife','Salvador','Manaus','Campinas','Santo André',
