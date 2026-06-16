@@ -338,6 +338,8 @@ const keywords = [];
 
 const estados = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
 const cidades = [
+  // regiões do Brasil — variantes com e sem hífen para cobrir ambas as grafias
+  'Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul',
   // estados — nomes compostos primeiro para não ser engolidos por substrings
   'Mato Grosso do Sul','Rio Grande do Norte','Rio Grande do Sul','Espírito Santo',
   'Santa Catarina','Mato Grosso','Minas Gerais','Distrito Federal',
@@ -670,15 +672,17 @@ function naturalizar(kw) {
   const norm = tokens.map(normalizar);
   const localizacao = detectarLocalizacao(norm);
 
+  // palavras que compõem o nome da localização detectada (ex: ["mato","grosso","do","sul"])
+  const locPalavras = localizacao ? new Set(normalizar(localizacao).split(' ')) : new Set();
+
   let nucleoTokens = [];
   for (let i=0;i<tokens.length;i++) {
     const n = norm[i];
-    if (estados.includes(n)||(localizacao&&localizacao.toLowerCase().includes(tokens[i].toLowerCase()))) continue;
+    if (estados.includes(n) || locPalavras.has(n)) continue;
     nucleoTokens.push(tokens[i]);
   }
   if (localizacao) {
-    const locNorm = normalizar(localizacao);
-    nucleoTokens = nucleoTokens.filter(t=>!locNorm.includes(normalizar(t)));
+    nucleoTokens = nucleoTokens.filter(t => !locPalavras.has(normalizar(t)));
   }
 
   const loc = localizacao ? ` em ${localizacao}` : '';
