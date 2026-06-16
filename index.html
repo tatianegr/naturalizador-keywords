@@ -337,19 +337,21 @@
 const keywords = [];
 
 const estados = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
+// ordenado por comprimento decrescente para que entradas mais específicas (ex: "Mato Grosso do Sul")
+// sempre sejam testadas antes das mais curtas (ex: "Sul"), evitando matches errados
 const cidades = [
-  // estados — compostos primeiro (mais específicos), depois simples, depois regiões
+  // estados
   'Mato Grosso do Sul','Rio Grande do Norte','Rio Grande do Sul','Espírito Santo',
   'Santa Catarina','Mato Grosso','Minas Gerais','Distrito Federal',
   'Rondônia','Roraima','Tocantins','Pernambuco','Maranhão','Amazonas',
   'Alagoas','Sergipe','Paraíba','Paraná','Amapá','Goiás','Ceará','Bahia','Acre','Piauí',
-  // regiões — depois dos estados para não engolir substrings como "sul" em "Mato Grosso do Sul"
+  // regiões
   'Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul',
   // cidades
   'São Paulo','Rio de Janeiro','Belo Horizonte','Curitiba','Porto Alegre',
   'Fortaleza','Recife','Salvador','Manaus','Campinas','Santo André',
   'Guarulhos','Osasco','Sorocaba','Ribeirão Preto','Santos',
-];
+].sort((a, b) => normalizar(b).length - normalizar(a).length);
 
 // substantivos cujo complemento é naturalmente ligado por "de" (ex: "fornecedor de cabos")
 const precisaDe = new Set([
