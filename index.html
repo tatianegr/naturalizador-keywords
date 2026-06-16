@@ -685,7 +685,10 @@ function naturalizar(kw) {
     nucleoTokens = nucleoTokens.filter(t => !locPalavras.has(normalizar(t)));
   }
 
-  const loc = localizacao ? ` em ${localizacao}` : '';
+  const regioes = new Set(['Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul']);
+  const loc = localizacao
+    ? regioes.has(localizacao) ? ` na região ${localizacao}` : ` em ${localizacao}`
+    : '';
 
   // remove conectivo que já ligava o núcleo à localização (ex: "...em sp" -> não duplicar "em")
   const conectivosLoc = new Set(['em','no','na','para','de']);
