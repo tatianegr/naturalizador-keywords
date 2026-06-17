@@ -562,6 +562,23 @@ const correcoesAcento = {
   'varios':'vários','varias':'várias',
   'proprio':'próprio','propria':'própria','proprios':'próprios','proprias':'próprias',
   'util':'útil','uteis':'úteis','habil':'hábil','habeis':'hábeis',
+  'textil':'têxtil','texteis':'têxteis','acrilico':'acrílico','acrilicos':'acrílicos',
+  'ima':'ímã','imas':'ímãs','lapis':'lápis','onix':'ônix',
+  'helice':'hélice','helices':'hélices','alvara':'alvará','alvaras':'alvarás',
+  'agil':'ágil','ageis':'ágeis','fertil':'fértil','ferteis':'férteis',
+  'fragil':'frágil','frageis':'frágeis','estavel':'estável','estaveis':'estáveis',
+  'volatil':'volátil','volateis':'voláteis','termico':'térmico','termica':'térmica',
+  'termicos':'térmicos','termicas':'térmicas','cubico':'cúbico','cubica':'cúbica',
+  'cubicos':'cúbicos','cubicas':'cúbicas','rustico':'rústico','rustica':'rústica',
+  'rusticos':'rústicos','rusticas':'rústicas','periodo':'período','periodos':'períodos',
+  'celula':'célula','celulas':'células','molecula':'molécula','moleculas':'moléculas',
+  'particula':'partícula','particulas':'partículas','formula':'fórmula','formulas':'fórmulas',
+  'regua':'régua','reguas':'réguas','xicara':'xícara','xicaras':'xícaras',
+  'carater':'caráter','caracteristica':'característica','caracteristicas':'características',
+  'genero':'gênero','generos':'gêneros','fenomeno':'fenômeno','fenomenos':'fenômenos',
+  'patrimonio':'patrimônio','patrimonios':'patrimônios','sinonimo':'sinônimo','sinonimos':'sinônimos',
+  'ortodontico':'ortodôntico','ortodontica':'ortodôntica','protese':'prótese','proteses':'próteses',
+  'premio':'prêmio','premios':'prêmios','gratis':'grátis',
 };
 
 // regras gerais para terminações comuns do português que costumam vir sem acento
@@ -579,6 +596,8 @@ function aplicarRegraSufixo(p) {
   if (p.length > 5 && p.endsWith('ancia')) return p.slice(0,-5) + 'ância';
   if (p.length > 5 && p.endsWith('ancas')) return p.slice(0,-5) + 'anças';
   if (p.length > 4 && p.endsWith('anca')) return p.slice(0,-4) + 'ança';
+  if (p.length > 5 && p.endsWith('encas')) return p.slice(0,-5) + 'enças';
+  if (p.length > 4 && p.endsWith('enca')) return p.slice(0,-4) + 'ença';
   return null;
 }
 
