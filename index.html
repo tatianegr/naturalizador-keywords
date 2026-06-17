@@ -378,6 +378,10 @@ const aplicacoes = new Set([
 const comNo = new Set(['atacado','varejo']);
 const comEm = new Set(['promocao','promocoes','oferta','ofertas','liquidacao','liquidacoes','alta','baixa','conta']);
 
+// palavras que indicam um processo/técnica e pedem "a" antes, em qualquer posição da frase
+// (ex: "tear jato de ar" -> "tear a jato de ar", "corte laser" -> "corte a laser")
+const comA = new Set(['jato','vapor','laser','combustao','alcool','gasolina','diesel','carvao']);
+
 
 // padrões de pergunta que aparecem soltos no fim da keyword e devem vir para o início
 // (ex: "eixo cardan para que serve" -> "para que serve o eixo cardan")
@@ -659,7 +663,7 @@ function detectarLocalizacao(tokens) {
   return null;
 }
 
-const conectivos = new Set(['de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
+const conectivos = new Set(['a','de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
 const precoWords = new Set(['preco','precos','valor','valores','orcamento','cotacao','tabela']);
 const preposicoesLocal = new Set(['em','no','na','nos','nas']);
 
@@ -672,6 +676,7 @@ const palavrasComuns = new Set([
   ...aplicacoes,
   ...comNo,
   ...comEm,
+  ...comA,
   ...perguntas.flat(),
   ...estados,
   ...Object.keys(correcoesAcento),
@@ -745,6 +750,14 @@ function naturalizar(kw) {
   if (localizacao) {
     while (nucleoTokens.length && conectivosLoc.has(normalizar(nucleoTokens[nucleoTokens.length-1]))) {
       nucleoTokens.pop();
+    }
+  }
+
+  // insere "a" antes de palavras como "jato"/"vapor"/"laser" quando aparecem soltas
+  // no meio ou fim da frase, sem conectivo antes (ex: "tear jato de ar" -> "tear a jato de ar")
+  for (let i = nucleoTokens.length - 1; i >= 0; i--) {
+    if (comA.has(normalizar(nucleoTokens[i])) && (i === 0 || !conectivos.has(normalizar(nucleoTokens[i-1])))) {
+      nucleoTokens.splice(i, 0, 'a');
     }
   }
 
