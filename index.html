@@ -579,6 +579,31 @@ const correcoesAcento = {
   'patrimonio':'patrimônio','patrimonios':'patrimônios','sinonimo':'sinônimo','sinonimos':'sinônimos',
   'ortodontico':'ortodôntico','ortodontica':'ortodôntica','protese':'prótese','proteses':'próteses',
   'premio':'prêmio','premios':'prêmios','gratis':'grátis',
+  'pinca':'pinça','pincas':'pinças','lanca':'lança','lancas':'lanças',
+  'tranca':'trança','trancas':'tranças','onca':'onça','oncas':'onças',
+  'manga':'manga','arame':'arame','metalico':'metálico','metalica':'metálica',
+  'metalicos':'metálicos','metalicas':'metálicas','plastico':'plástico','plastica':'plástica',
+  'plasticos':'plásticos','plasticas':'plásticas','organico':'orgânico','organica':'orgânica',
+  'organicos':'orgânicos','organicas':'orgânicas','quimico':'químico','quimica':'química',
+  'quimicos':'químicos','quimicas':'químicas','classico':'clássico','classica':'clássica',
+  'classicos':'clássicos','classicas':'clássicas','pratico':'prático','pratica':'prática',
+  'praticos':'práticos','praticas':'práticas','basico':'básico','basica':'básica',
+  'basicos':'básicos','basicas':'básicas','unico':'único','unica':'única',
+  'unicos':'únicos','unicas':'únicas','especifico':'específico','especifica':'específica',
+  'especificos':'específicos','especificas':'específicas','domestico':'doméstico','domestica':'doméstica',
+  'domesticos':'domésticos','domesticas':'domésticas','automatico':'automático','automatica':'automática',
+  'automaticos':'automáticos','automaticas':'automáticas','pneumatico':'pneumático','pneumatica':'pneumática',
+  'pneumaticos':'pneumáticos','pneumaticas':'pneumáticas','hidraulico':'hidráulico','hidraulica':'hidráulica',
+  'hidraulicos':'hidráulicos','hidraulicas':'hidráulicas','mecanico':'mecânico','mecanica':'mecânica',
+  'mecanicos':'mecânicos','mecanicas':'mecânicas','eletronico':'eletrônico','eletronica':'eletrônica',
+  'eletronicos':'eletrônicos','eletronicas':'eletrônicas','eletrico':'elétrico','eletrica':'elétrica',
+  'eletricos':'elétricos','eletricas':'elétricas','industria':'indústria','industrias':'indústrias',
+  'industrial':'industrial','tecido':'tecido','tecidos':'tecidos','sintetico':'sintético',
+  'sintetica':'sintética','sinteticos':'sintéticos','sinteticas':'sintéticas',
+  'peca':'peça','pecas':'peças','cordao':'cordão','cordoes':'cordões',
+  'colchao':'colchão','colchoes':'colchões','botao':'botão','botoes':'botões',
+  'limao':'limão','limoes':'limões','irmao':'irmão','irmaos':'irmãos',
+  'lampada':'lâmpada','lampadas':'lâmpadas','tabua':'tábua','tabuas':'tábuas',
 };
 
 // regras gerais para terminações comuns do português que costumam vir sem acento
@@ -598,6 +623,10 @@ function aplicarRegraSufixo(p) {
   if (p.length > 4 && p.endsWith('anca')) return p.slice(0,-4) + 'ança';
   if (p.length > 5 && p.endsWith('encas')) return p.slice(0,-5) + 'enças';
   if (p.length > 4 && p.endsWith('enca')) return p.slice(0,-4) + 'ença';
+  if (p.length > 5 && p.endsWith('incas')) return p.slice(0,-5) + 'inças';
+  if (p.length > 4 && p.endsWith('inca')) return p.slice(0,-4) + 'inça';
+  if (p.length > 5 && p.endsWith('oncas')) return p.slice(0,-5) + 'onças';
+  if (p.length > 4 && p.endsWith('onca')) return p.slice(0,-4) + 'onça';
   return null;
 }
 
