@@ -610,6 +610,45 @@ const correcoesAcento = {
   'colchao':'colchão','colchoes':'colchões','botao':'botão','botoes':'botões',
   'limao':'limão','limoes':'limões','irmao':'irmão','irmaos':'irmãos',
   'lampada':'lâmpada','lampadas':'lâmpadas','tabua':'tábua','tabuas':'tábuas',
+
+  // mais palavras comuns (substantivos terminados em -ario/-orio/-icio/-uo, agro/veterinária, etc.)
+  'agricola':'agrícola','agricolas':'agrícolas','pecuaria':'pecuária',
+  'veterinario':'veterinário','veterinaria':'veterinária','veterinarios':'veterinários',
+  'farmaceutico':'farmacêutico','farmaceutica':'farmacêutica','farmaceuticos':'farmacêuticos',
+  'genetico':'genético','genetica':'genética',
+  'climatico':'climático','climatica':'climática',
+  'geometrico':'geométrico','geometrica':'geométrica',
+  'magnetico':'magnético','magnetica':'magnética',
+  'energetico':'energético','energetica':'energética',
+  'genuino':'genuíno','genuina':'genuína',
+  'continuo':'contínuo','continua':'contínua',
+  'individuo':'indivíduo','individuos':'indivíduos',
+  'residuo':'resíduo','residuos':'resíduos',
+  'beneficio':'benefício','beneficios':'benefícios',
+  'edificio':'edifício','edificios':'edifícios',
+  'exercicio':'exercício','exercicios':'exercícios',
+  'principio':'princípio','principios':'princípios',
+  'municipio':'município','municipios':'municípios',
+  'usuario':'usuário','usuarios':'usuários',
+  'horario':'horário','horarios':'horários',
+  'salario':'salário','salarios':'salários',
+  'comentario':'comentário','comentarios':'comentários',
+  'formulario':'formulário','formularios':'formulários',
+  'aniversario':'aniversário','aniversarios':'aniversários',
+  'voluntario':'voluntário','voluntarios':'voluntários',
+  'necessario':'necessário','necessaria':'necessária',
+  'contrario':'contrário','contraria':'contrária',
+  'diario':'diário','diaria':'diária','diarios':'diários','diarias':'diárias',
+  'sanitario':'sanitário','sanitaria':'sanitária',
+  'funcionario':'funcionário','funcionarios':'funcionários',
+  'dicionario':'dicionário','condominio':'condomínio','condominios':'condomínios',
+  'territorio':'território','territorios':'territórios',
+  'relatorio':'relatório','relatorios':'relatórios',
+  'laboratorio':'laboratório','laboratorios':'laboratórios',
+  'consultorio':'consultório','consultorios':'consultórios',
+  'escritorio':'escritório','escritorios':'escritórios',
+  'dormitorio':'dormitório','dormitorios':'dormitórios',
+  'reservatorio':'reservatório','reservatorios':'reservatórios',
 };
 
 // regras gerais para terminações comuns do português que costumam vir sem acento
@@ -657,7 +696,8 @@ function artigo(nucleoTokens) {
 function detectarLocalizacao(tokens) {
   const joined = tokens.join(' ');
   for (const c of cidades) {
-    if (joined.includes(normalizar(c))) return c;
+    const re = new RegExp('\\b' + normalizar(c).replace(/ /g, '\\s+') + '\\b');
+    if (re.test(joined)) return c;
   }
   for (const t of tokens) {
     if (estados.includes(normalizar(t))) return t.toUpperCase();
