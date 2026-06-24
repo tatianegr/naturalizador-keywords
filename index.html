@@ -762,6 +762,9 @@ function capitalizarLocalDesconhecido(frase) {
 }
 
 function naturalizar(kw) {
+  // expressões compostas que sempre levam hífen (ex: "check up" -> "check-up")
+  kw = kw.replace(/\bcheck[\s-]?ups?\b/gi, m => /s$/i.test(m) ? 'check-ups' : 'check-up');
+
   const tokens = kw.trim().split(/\s+/).map(t => {
     const n = normalizar(t);
     return correcoesAcento[n] || aplicarRegraSufixo(n) || t;
