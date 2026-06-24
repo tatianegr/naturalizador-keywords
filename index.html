@@ -437,6 +437,7 @@ const correcoesAcento = {
   'gestao':'gestão','educacao':'educação','alimentacao':'alimentação',
   'nutricao':'nutrição',
   'odontologico':'odontológico','odontologica':'odontológica',
+  'toxicologico':'toxicológico','toxicologica':'toxicológica',
   'pediatrico':'pediátrico','pediatrica':'pediátrica',
   'terapeutico':'terapêutico','terapeutica':'terapêutica',
   'estetico':'estético','estetica':'estética','esteticos':'estéticos','esteticas':'estéticas',
@@ -746,11 +747,32 @@ function capitalizarLocalDesconhecido(frase) {
   while (i >= 0 && !palavrasComuns.has(normalizar(partes[i]))) {
     i--;
   }
-  // se houver pelo menos uma palavra desconhecida no fim e a palavra anterior for
-  // ambígua (ex: "jardim"), considera que ela faz parte do nome do lugar
-  if (i >= 0 && i < partes.length - 1 && ambiguosLocal.has(normalizar(partes[i]))) {
-    i--;
+  const unknownStart = i + 1;
+
+  // procura um termo que tipicamente antecede um nome de lugar (ex: "vila", "jardim",
+  // "parque") — tanto a própria palavra onde a busca parou (caso ela esteja em
+  // palavrasComuns, ex: "jardim") quanto dentro do trecho desconhecido que vem depois
+  // (caso não esteja, ex: "vila") — a partir dele, trata o restante como nome de lugar
+  // mesmo sem preposição antes
+  // (ex: "exame toxicologico vila sonia" -> "exame toxicológico em Vila Sonia")
+  let placeStart = (i >= 0 && ambiguosLocal.has(normalizar(partes[i]))) ? i : -1;
+  if (placeStart === -1) {
+    let k = unknownStart;
+    while (k < partes.length && !ambiguosLocal.has(normalizar(partes[k]))) k++;
+    if (k < partes.length) placeStart = k;
   }
+  if (placeStart !== -1 && placeStart < partes.length - 1) {
+    const antes = placeStart - 1;
+    const jaTemPreposicao = antes >= 0 && preposicoesLocal.has(normalizar(partes[antes]));
+    for (let j = placeStart; j < partes.length; j++) {
+      partes[j] = partes[j].charAt(0).toUpperCase() + partes[j].slice(1);
+    }
+    if (!jaTemPreposicao) {
+      partes.splice(placeStart, 0, 'em');
+    }
+    return partes.join(' ');
+  }
+
   const ehPreposicaoLocal = i >= 0 && preposicoesLocal.has(normalizar(partes[i]));
   const ehLigacaoLugar = i > 0 && ligacoesLugar.has(normalizar(partes[i])) && palavrasLugar.has(normalizar(partes[i-1]));
   if (i < partes.length - 1 && (ehPreposicaoLocal || ehLigacaoLugar)) {
