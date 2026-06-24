@@ -768,7 +768,8 @@ function capitalizarLocalDesconhecido(frase) {
       partes[j] = partes[j].charAt(0).toUpperCase() + partes[j].slice(1);
     }
     if (!jaTemPreposicao) {
-      partes.splice(placeStart, 0, 'em');
+      const preposicao = artigo([partes[placeStart]]) === 'a' ? 'na' : 'no';
+      partes.splice(placeStart, 0, preposicao);
     }
     return partes.join(' ');
   }
