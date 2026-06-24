@@ -351,7 +351,23 @@ const cidades = [
   'São Paulo','Rio de Janeiro','Belo Horizonte','Curitiba','Porto Alegre',
   'Fortaleza','Recife','Salvador','Manaus','Campinas','Santo André',
   'Guarulhos','Osasco','Sorocaba','Ribeirão Preto','Santos',
+  // bairros (zona oeste de SP, comuns em buscas de clínicas/serviços)
+  'Butantã','Pinheiros','Morumbi','Vila Sônia','Vila Madalena','Moema',
+  'Itaim Bibi','Tatuapé','Santana','Mooca','Vila Mariana','Brooklin',
+  'Perdizes','Tucuruvi','Ipiranga','Liberdade','Vila Olímpia','Saúde',
+  'Lapa','Bela Vista',
 ].sort((a, b) => normalizar(b).length - normalizar(a).length);
+
+// bairros cujo nome pede "no"/"na" (em vez de "em") de acordo com o gênero da primeira palavra
+// bairros e a preposição de lugar correta em português (não segue uma regra simples
+// de gênero — varia conforme o uso consagrado de cada nome, então é mapeado explicitamente)
+const bairros = new Map([
+  ['Butantã','no'],['Pinheiros','em'],['Morumbi','no'],['Vila Sônia','na'],
+  ['Vila Madalena','na'],['Moema','em'],['Itaim Bibi','no'],['Tatuapé','no'],
+  ['Santana','em'],['Mooca','na'],['Vila Mariana','na'],['Brooklin','no'],
+  ['Perdizes','em'],['Tucuruvi','no'],['Ipiranga','no'],['Liberdade','na'],
+  ['Vila Olímpia','na'],['Saúde','na'],['Lapa','na'],['Bela Vista','na'],
+]);
 
 // substantivos cujo complemento é naturalmente ligado por "de" (ex: "fornecedor de cabos")
 const precisaDe = new Set([
@@ -810,7 +826,9 @@ function naturalizar(kw) {
 
   const regioes = new Set(['Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul']);
   const loc = localizacao
-    ? regioes.has(localizacao) ? ` na região ${localizacao}` : ` em ${localizacao}`
+    ? regioes.has(localizacao) ? ` na região ${localizacao}`
+    : bairros.has(localizacao) ? ` ${bairros.get(localizacao)} ${localizacao}`
+    : ` em ${localizacao}`
     : '';
 
   // remove conectivo que já ligava o núcleo à localização (ex: "...em sp" -> não duplicar "em")
