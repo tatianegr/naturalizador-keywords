@@ -737,6 +737,7 @@ const palavrasComuns = new Set([
   ...comEm,
   ...comA,
   ...perguntas.flat(),
+  'o','que','e',
   ...estados,
   ...Object.keys(correcoesAcento),
   ...Object.values(correcoesAcento).map(normalizar),
@@ -857,6 +858,13 @@ function naturalizar(kw) {
   if (padraoPergunta) {
     const resto = nucleoTokens.slice(0, nucleoTokens.length - padraoPergunta.length);
     const frase = `${padraoPergunta.join(' ')} ${artigo(resto)} ${resto.join(' ')}`;
+    return `${capitalizarLocalDesconhecido(frase.toLowerCase())}${loc}`;
+  }
+
+  // "o que é" já vem com o artigo embutido, então não soma outro (ex: "outsourcing o que é" -> "o que é outsourcing")
+  if (combinaSufixo(nucleoNorm, ['o','que','e'])) {
+    const resto = nucleoTokens.slice(0, nucleoTokens.length - 3);
+    const frase = `o que é ${resto.join(' ')}`;
     return `${capitalizarLocalDesconhecido(frase.toLowerCase())}${loc}`;
   }
 
