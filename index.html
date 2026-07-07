@@ -737,7 +737,7 @@ function detectarLocalizacao(tokens) {
     if (siglaParaEstado[sigla]) {
       const nomeEstado = siglaParaEstado[sigla];
       // só registra como estado separado se não for o mesmo que o principal já detectado
-      if (nomeEstado !== principal) estado = nomeEstado;
+      if (nomeEstado !== principal) estado = t.toUpperCase(); // mantém a sigla original (ex: "SP")
       break;
     }
   }
