@@ -713,25 +713,37 @@ function artigo(nucleoTokens) {
   return /(a|cao|sao|dade|agem)$/.test(principal) ? 'a' : 'o';
 }
 
+const siglaParaEstado = {
+  'ac':'Acre','al':'Alagoas','ap':'Amapá','am':'Amazonas','ba':'Bahia','ce':'Ceará',
+  'df':'Distrito Federal','es':'Espírito Santo','go':'Goiás','ma':'Maranhão',
+  'mt':'Mato Grosso','ms':'Mato Grosso do Sul','mg':'Minas Gerais','pa':'Pará',
+  'pb':'Paraíba','pr':'Paraná','pe':'Pernambuco','pi':'Piauí','rj':'Rio de Janeiro',
+  'rn':'Rio Grande do Norte','rs':'Rio Grande do Sul','ro':'Rondônia','rr':'Roraima',
+  'sc':'Santa Catarina','sp':'São Paulo','se':'Sergipe','to':'Tocantins',
+};
+
+// retorna {principal, estado}: principal = bairro/cidade/região detectada; estado = estado
+// detectado por sigla (ex: "SP") que possa coexistir com o principal (ex: "Zona Norte SP")
 function detectarLocalizacao(tokens) {
   const joined = tokens.join(' ');
+  let principal = null;
   for (const c of cidades) {
     const re = new RegExp('\\b' + normalizar(c).replace(/ /g, '\\s+') + '\\b');
-    if (re.test(joined)) return c;
+    if (re.test(joined)) { principal = c; break; }
   }
-  const siglaParaEstado = {
-    'ac':'Acre','al':'Alagoas','ap':'Amapá','am':'Amazonas','ba':'Bahia','ce':'Ceará',
-    'df':'Distrito Federal','es':'Espírito Santo','go':'Goiás','ma':'Maranhão',
-    'mt':'Mato Grosso','ms':'Mato Grosso do Sul','mg':'Minas Gerais','pa':'Pará',
-    'pb':'Paraíba','pr':'Paraná','pe':'Pernambuco','pi':'Piauí','rj':'Rio de Janeiro',
-    'rn':'Rio Grande do Norte','rs':'Rio Grande do Sul','ro':'Rondônia','rr':'Roraima',
-    'sc':'Santa Catarina','sp':'São Paulo','se':'Sergipe','to':'Tocantins',
-  };
+  let estado = null;
   for (const t of tokens) {
     const sigla = normalizar(t);
-    if (siglaParaEstado[sigla]) return siglaParaEstado[sigla];
+    if (siglaParaEstado[sigla]) {
+      const nomeEstado = siglaParaEstado[sigla];
+      // só registra como estado separado se não for o mesmo que o principal já detectado
+      if (nomeEstado !== principal) estado = nomeEstado;
+      break;
+    }
   }
-  return null;
+  // se só há estado (sem bairro/cidade), devolve como principal para manter comportamento atual
+  if (!principal && estado) return { principal: estado, estado: null };
+  return { principal, estado };
 }
 
 const conectivos = new Set(['a','de','da','do','das','dos','em','no','na','nos','nas','para','pra','com','sem','sobre','e','um','uma','uns','umas']);
@@ -822,15 +834,17 @@ function naturalizar(kw) {
     return correcoesAcento[n] || aplicarRegraSufixo(n) || t;
   });
   const norm = tokens.map(normalizar);
-  const localizacao = detectarLocalizacao(norm);
+  const { principal: localizacao, estado: estadoExtra } = detectarLocalizacao(norm);
 
   // palavras que compõem o nome da localização detectada (ex: ["mato","grosso","do","sul"])
   const locPalavras = localizacao ? new Set(normalizar(localizacao).split(' ')) : new Set();
+  // palavras da sigla/estado extra (ex: "sp") também devem ser removidas do núcleo
+  const estadoPalavras = estadoExtra ? new Set(normalizar(estadoExtra).split(' ')) : new Set();
 
   let nucleoTokens = [];
   for (let i=0;i<tokens.length;i++) {
     const n = norm[i];
-    if (estados.includes(n) || locPalavras.has(n)) continue;
+    if (estados.includes(n) || locPalavras.has(n) || estadoPalavras.has(n)) continue;
     nucleoTokens.push(tokens[i]);
   }
   if (localizacao) {
@@ -838,11 +852,13 @@ function naturalizar(kw) {
   }
 
   const regioes = new Set(['Centro-Oeste','Centro Oeste','Nordeste','Sudeste','Norte','Sul']);
-  const loc = localizacao
+  const locPrincipal = localizacao
     ? regioes.has(localizacao) ? ` na região ${localizacao}`
     : bairros.has(localizacao) ? ` ${bairros.get(localizacao)} ${localizacao}`
     : ` em ${localizacao}`
     : '';
+  const locEstado = estadoExtra ? ` de ${estadoExtra}` : '';
+  const loc = `${locPrincipal}${locEstado}`;
 
   // remove conectivo que já ligava o núcleo à localização (ex: "...em sp" -> não duplicar "em")
   const conectivosLoc = new Set(['em','no','na','para','de']);
@@ -861,7 +877,7 @@ function naturalizar(kw) {
   }
 
   if (nucleoTokens.length === 0) {
-    return localizacao ? localizacao : capitalizarLocalDesconhecido(kw.toLowerCase());
+    return localizacao ? `${localizacao}${locEstado}` : capitalizarLocalDesconhecido(kw.toLowerCase());
   }
 
   // pergunta solta no fim da keyword (ex: "eixo cardan para que serve") vai para o início
