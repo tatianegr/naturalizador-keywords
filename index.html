@@ -356,6 +356,8 @@ const cidades = [
   'Itaim Bibi','Tatuapé','Santana','Mooca','Vila Mariana','Brooklin',
   'Perdizes','Tucuruvi','Ipiranga','Liberdade','Vila Olímpia','Saúde',
   'Lapa','Bela Vista',
+  // zonas de SP (antes das regiões do Brasil para não colidir com "Norte"/"Sul" soltos)
+  'Zona Norte','Zona Sul','Zona Leste','Zona Oeste','Zona Central',
 ].sort((a, b) => normalizar(b).length - normalizar(a).length);
 
 // bairros cujo nome pede "no"/"na" (em vez de "em") de acordo com o gênero da primeira palavra
@@ -367,6 +369,7 @@ const bairros = new Map([
   ['Santana','em'],['Mooca','na'],['Vila Mariana','na'],['Brooklin','no'],
   ['Perdizes','em'],['Tucuruvi','no'],['Ipiranga','no'],['Liberdade','na'],
   ['Vila Olímpia','na'],['Saúde','na'],['Lapa','na'],['Bela Vista','na'],
+  ['Zona Norte','na'],['Zona Sul','na'],['Zona Leste','na'],['Zona Oeste','na'],['Zona Central','na'],
 ]);
 
 // substantivos cujo complemento é naturalmente ligado por "de" (ex: "fornecedor de cabos")
@@ -716,8 +719,17 @@ function detectarLocalizacao(tokens) {
     const re = new RegExp('\\b' + normalizar(c).replace(/ /g, '\\s+') + '\\b');
     if (re.test(joined)) return c;
   }
+  const siglaParaEstado = {
+    'ac':'Acre','al':'Alagoas','ap':'Amapá','am':'Amazonas','ba':'Bahia','ce':'Ceará',
+    'df':'Distrito Federal','es':'Espírito Santo','go':'Goiás','ma':'Maranhão',
+    'mt':'Mato Grosso','ms':'Mato Grosso do Sul','mg':'Minas Gerais','pa':'Pará',
+    'pb':'Paraíba','pr':'Paraná','pe':'Pernambuco','pi':'Piauí','rj':'Rio de Janeiro',
+    'rn':'Rio Grande do Norte','rs':'Rio Grande do Sul','ro':'Rondônia','rr':'Roraima',
+    'sc':'Santa Catarina','sp':'São Paulo','se':'Sergipe','to':'Tocantins',
+  };
   for (const t of tokens) {
-    if (estados.includes(normalizar(t))) return t.toUpperCase();
+    const sigla = normalizar(t);
+    if (siglaParaEstado[sigla]) return siglaParaEstado[sigla];
   }
   return null;
 }
